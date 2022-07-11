@@ -1,0 +1,17 @@
+/* 
+    Checkpoint 3 Test 1 
+    Description:    Count down from the input to 0
+    By:             Adrian Clinansmith
+    Date:           April 2022
+    Demonstrates:   Looping, input, assignment, local variable
+*/
+void main(void) {
+    int c;
+    c = input();
+    while(c > 0) {
+        output(c);
+        c = c - 1;
+    }
+    output(c);
+}
+

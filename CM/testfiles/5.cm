@@ -1,0 +1,10 @@
+/* 
+    Checkpoint 3 Test 5
+    Description:    Semantic errors
+    By:             Adrian Clinansmith
+    Date:           April 2022
+    Demonstrates:   'a' undeclared, no 'main' function 
+*/
+int func(void) {
+    return a;
+}

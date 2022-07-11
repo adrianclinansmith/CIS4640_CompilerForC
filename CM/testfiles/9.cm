@@ -1,0 +1,22 @@
+/* 
+    Checkpoint 3 Test 9
+    Description:    Prints 3, 2, 1
+    By:             Adrian Clinansmith
+    Date:           April 2022
+    Demonstrates:   Nested blocks
+*/
+void main(void) {
+    int x;
+    x = 1;
+    {
+        int x;
+        x = 2;
+        {
+            int x;
+            x = 3;
+            output(x);
+        }
+        output(x);
+    }
+    output(x);
+}

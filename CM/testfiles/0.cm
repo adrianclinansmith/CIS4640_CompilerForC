@@ -1,0 +1,11 @@
+/* 
+    Checkpoint 3 Test 8
+    Description:    Run time error
+    By:             Adrian Clinansmith
+    Date:           April 2022
+    Demonstrates:   index less than zero - HALT 2,0,0
+*/
+void main(void) {
+    int x[10]; 
+    output(x[2-4]);
+}

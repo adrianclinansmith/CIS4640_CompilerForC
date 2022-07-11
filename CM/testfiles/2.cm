@@ -1,0 +1,24 @@
+/* 
+    Checkpoint 3 Test 2 
+    Description:    The Fibonacci sequence for the 2 given start values
+    By:             Adrian Clinansmith
+    Date:           April 2022
+    Demonstrates:   If-statement, function call, recursion, global variable
+*/
+int max;
+void fib(int a, int b) {
+    if (max < 10) {
+        output(b);
+        max = max + 1;
+        fib(b, a+b);
+    }
+}
+void main(void) {
+    int a; int b;
+    max = 0;
+    a = input();
+    b = input();
+    output(a);
+    fib(a, b);
+
+}

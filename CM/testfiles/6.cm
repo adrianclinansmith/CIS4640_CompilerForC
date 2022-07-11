@@ -1,0 +1,13 @@
+/* 
+    Checkpoint 3 Test 6
+    Description:    Syntax Errors
+    By:             Adrian Clinansmith
+    Date:           April 2022
+    Demonstrates:   Invalid function declaration
+*/
+void main() {
+    int a; int b;
+    a = input();
+    b = input();
+    output(a+b);
+}

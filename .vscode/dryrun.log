@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/adrianclinansmith/Documents/University_of_Guelph/12_2022_Winter/CIS4640_Compilers/Assignments/Checkpoint3'
+make: Leaving directory `/Users/adrianclinansmith/Documents/University_of_Guelph/12_2022_Winter/CIS4640_Compilers/Assignments/Checkpoint3'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+

@@ -1,0 +1,279 @@
+/*
+  Created by: Adrian Clinansmith
+  File Name: ParserGenerator.cup
+  To Build: make
+*/
+   
+// **************************************************************************** 
+// Preliminary Declarations Section
+// ****************************************************************************
+
+/* Created by: Fei Song */ 
+/* Import the class java_cup.runtime.*  */
+//import java_cup.runtime.*;
+import absyn.*;
+   
+/* Parser code to change the way the parser reports errors (include
+   line and column number of the error). */
+parser code {:
+    
+    /* Change the method report_error so it will display the line and
+       column of where the error occurred in the input as well as the
+       reason for the error which is passed into the method in the
+       String 'message'. */
+    public void report_error(String message, Object info) {
+   
+        /* Create a StringBuffer called 'm' with the string 'Error' in it. */
+        StringBuffer m = new StringBuffer("Error");
+   
+        /* Check if the information passed to the method is the same
+           type as the type java_cup.runtime.Symbol. */
+        if (info instanceof java_cup.runtime.Symbol) {
+            /* Declare a java_cup.runtime.Symbol object 's' with the
+               information in the object info that is being typecasted
+               as a java_cup.runtime.Symbol object. */
+         java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+   
+            /* Check if the line number in the input is greater or
+               equal to zero. */
+            if (s.left >= 0) {                
+                /* Add to the end of the StringBuffer error message
+                   the line number of the error in the input. */
+               m.append(" in line "+(s.left+1));   
+                /* Check if the column number in the input is greater
+                   or equal to zero. */
+               if (s.right >= 0)                    
+                    /* Add to the end of the StringBuffer error message
+                       the column number of the error in the input. */
+                  m.append(", column "+(s.right+1));
+            }
+        }
+   
+        /* Add to the end of the StringBuffer error message created in
+           this method the message that was passed into this method. */
+        m.append(" : "+message);
+   
+        /* Print the contents of the StringBuffer 'm', which contains
+           an error message, out on a line. */
+        System.err.println(m);
+    }
+   
+    /* Change the method report_fatal_error so when it reports a fatal
+       error it will display the line and column number of where the
+       fatal error occurred in the input as well as the reason for the
+       fatal error which is passed into the method in the object
+       'message' and then exit.*/
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+
+:};
+   
+// **************************************************************************** 
+// Declaration of Terminals and Non Terminals Section
+// ****************************************************************************
+
+/* Terminals */
+
+// C- Keywords
+terminal          IF, ELSE, INT, RETURN, VOID, WHILE;
+// C- Special Symbols
+terminal          PLUS, MINUS, TIMES, DIVIDE, LESS, LESS_EQ, GREATER, GREATER_EQ, EQUAL;
+terminal          NOT_EQUAL, ASSIGN, SEMI, COMMA, OPEN_PAREN, CLOSE_PAREN, OPEN_BRACKET;
+terminal          CLOSE_BRACKET, OPEN_BRACE, CLOSE_BRACE;
+// Open Tokens
+terminal String   ID, NUM;
+terminal          ERROR;
+
+/* Non-terminals */
+   
+non terminal DecList       program, declaration_list;    
+non terminal Dec           declaration, fun_declaration;
+non terminal VarDec        var_declaration, param;
+non terminal NameTy        type_specifier;
+non terminal VarDecList    params, param_list, local_declarations;
+non terminal ExpList       statement_list, args, arg_list;
+non terminal Exp           statement, expression, expression_stmt, simple_expression;
+non terminal Var           var;
+non terminal CompoundExp   compound_stmt;
+non terminal ReturnExp     return_stmt; 
+non terminal CallExp       call;
+non terminal WhileExp      iteration_stmt;
+non terminal IfExp         selection_stmt;
+
+/* Precedence */
+
+precedence nonassoc  LESS, LESS_EQ, GREATER, GREATER_EQ, EQUAL, NOT_EQUAL;
+precedence left      PLUS, MINUS;
+precedence left      TIMES, DIVIDE;
+
+// ****************************************************************************
+// Grammar Section
+// ****************************************************************************
+   
+start with program;
+
+program ::= 
+   declaration_list:x
+      {: RESULT = x; :};
+
+declaration_list ::= 
+   declaration_list:x0 declaration:x1
+      {: x0.append(x1); RESULT = x0; :}
+   | declaration:x
+      {: RESULT = new DecList(x, null); :};
+
+declaration ::= 
+   var_declaration:x 
+      {: RESULT = x; :}
+   | fun_declaration:x
+      {: RESULT = x; :};
+
+var_declaration ::= 
+   type_specifier:x0 ID:x1 SEMI
+      {: RESULT = new SimpleDec(x0left, x0right, x0, x1); :}
+   | type_specifier:x0 ID:x1 OPEN_BRACKET NUM:x2 CLOSE_BRACKET SEMI
+      {: RESULT = new ArrayDec(x0left, x0right, x0, x1, x2); :}
+   | type_specifier:x0 ID:x1 OPEN_BRACKET error:e CLOSE_BRACKET SEMI
+      {: RESULT = ArrayDec.withSizeError(eleft, eright, x0, x1); :}
+   | error:e SEMI
+      {: RESULT = SimpleDec.withError(eleft, eright); :};
+
+type_specifier ::= 
+   INT:x 
+      {: RESULT = new NameTy(xleft, xright, NameTy.INT); :}
+   | VOID:x 
+      {: RESULT = new NameTy(xleft, xright, NameTy.VOID); :};
+
+fun_declaration ::= 
+   type_specifier:x0 ID:x1 OPEN_PAREN params:x2 CLOSE_PAREN compound_stmt:x3
+      {: RESULT = new FunctionDec(x0left, x0right, x0, x1, x2, x3); :}
+   | type_specifier:x0 ID:x1 OPEN_PAREN error:e CLOSE_PAREN compound_stmt:x2
+      {: RESULT = FunctionDec.withParamError(eleft, eright, x0, x1, x2); :};
+                 
+params ::= 
+   param_list:x
+      {: RESULT = x; :}
+   | VOID 
+      {: RESULT = null; :};
+      
+param_list ::= 
+   param_list:x0 COMMA param:x1 
+      {: x0.append(x1); RESULT = x0; :}
+   | param:x
+      {: RESULT = new VarDecList(x, null); :};
+               
+param ::=
+   type_specifier:x0 ID:x1 
+      {: RESULT = new SimpleDec(x0left, x0right, x0, x1); :}
+   | type_specifier:x0 ID:x1 OPEN_BRACKET CLOSE_BRACKET
+      {: RESULT = new ArrayDec(x0left, x0right, x0, x1, null); :};
+   
+compound_stmt ::= 
+   OPEN_BRACE local_declarations:x0 statement_list:x1 CLOSE_BRACE
+      {: RESULT = new CompoundExp(x0, x1); :};
+
+local_declarations ::= 
+   local_declarations:x0 var_declaration:x1
+      {: RESULT = (x0 != null) ? x0.append(x1) : new VarDecList(x1); :}
+   |
+      {: RESULT = null; :};
+
+statement_list ::= 
+   statement_list:x0 statement:x1
+      {: RESULT = (x0 != null) ? x0.append(x1) : new ExpList(x1); :}
+   |  
+      {: RESULT = null; :};
+
+statement ::= 
+   expression_stmt:x
+      {: RESULT = x; :}
+   | compound_stmt:x
+      {: RESULT = x; :}
+   | selection_stmt:x
+      {: RESULT = x; :}
+   | iteration_stmt:x
+      {: RESULT = x; :}
+   | return_stmt:x
+      {: RESULT = x; :};
+
+expression_stmt ::= 
+   expression:x SEMI 
+      {: RESULT = x; :}
+   | SEMI:x
+      {: RESULT = new NilExp(xleft, xright); :};
+
+selection_stmt ::=
+   IF:x0 OPEN_PAREN expression:x1 CLOSE_PAREN statement:x2
+      {: RESULT = new IfExp(x0left, x0right, x1, x2, null); :}
+   | IF:x0 OPEN_PAREN expression:x1 CLOSE_PAREN statement:x2 ELSE statement:x3
+      {: RESULT = new IfExp(x0left, x0right, x1, x2, x3); :};
+
+iteration_stmt ::=
+   WHILE:x0 OPEN_PAREN expression:x1 CLOSE_PAREN statement:x2
+      {: RESULT = new WhileExp(x0left, x0right, x1, x2); :};
+
+return_stmt ::=
+   RETURN:x0 expression:x1 SEMI 
+      {: RESULT = new ReturnExp(x0left, x0right, x1); :}
+   | RETURN:x SEMI
+      {: RESULT = new ReturnExp(xleft, xright, new NilExp(xleft, xright)); :};
+
+expression ::= 
+   var:x0 ASSIGN expression:x1
+      {: RESULT = new AssignExp(x0left, x0right, x0, x1); :} 
+   | simple_expression:x
+      {: RESULT = x; :};
+
+var ::= 
+   ID:x
+      {: RESULT = new SimpleVar(xleft, xright, x); :} 
+   | ID:x0 OPEN_BRACKET expression:x1 CLOSE_BRACKET
+      {: RESULT = new IndexVar(x0left, x0right, x0, x1); :};
+   
+simple_expression ::= 
+   simple_expression:x0 PLUS simple_expression:x1
+      {: RESULT = new OpExp(x0left, x0right, x0, OpExp.PLUS, x1); :}
+   | simple_expression:x0 MINUS simple_expression:x1 
+      {: RESULT = new OpExp(x0left, x0right, x0, OpExp.MINUS, x1); :}
+   | simple_expression:x0 TIMES simple_expression:x1
+      {: RESULT = new OpExp(x0left, x0right, x0, OpExp.TIMES, x1); :} 
+   | simple_expression:x0 DIVIDE simple_expression:x1 
+      {: RESULT = new OpExp(x0left, x0right, x0, OpExp.DIVIDE, x1); :}
+   | simple_expression:x0 LESS simple_expression:x1 
+      {: RESULT = new OpExp(x0left, x0right, x0, OpExp.LESS, x1); :}
+   | simple_expression:x0 LESS_EQ simple_expression:x1 
+      {: RESULT = new OpExp(x0left, x0right, x0, OpExp.LESS_EQ, x1); :}
+   | simple_expression:x0 GREATER simple_expression:x1 
+      {: RESULT = new OpExp(x0left, x0right, x0, OpExp.GREATER, x1); :}
+   | simple_expression:x0 GREATER_EQ simple_expression:x1 
+      {: RESULT = new OpExp(x0left, x0right, x0, OpExp.GREATER_EQ, x1); :}
+   | simple_expression:x0 EQUAL simple_expression:x1 
+      {: RESULT = new OpExp(x0left, x0right, x0, OpExp.EQUAL, x1); :}
+   | simple_expression:x0 NOT_EQUAL simple_expression:x1 
+      {: RESULT = new OpExp(x0left, x0right, x0, OpExp.NOT_EQUAL, x1); :}
+   | OPEN_PAREN expression:x CLOSE_PAREN
+      {: RESULT = x; :}
+   | var:x
+      {: RESULT = new VarExp(xleft, xright, x); :}
+   | call:x
+      {: RESULT = x; :}
+   | NUM:x
+      {: RESULT = new IntExp(x); :};
+            
+call ::= 
+   ID:x0 OPEN_PAREN args:x1 CLOSE_PAREN
+      {: RESULT = new CallExp(x0left, x0right, x0, x1); :};
+
+args ::=
+   arg_list:x
+      {: RESULT = x; :}
+   |
+      {: RESULT = null; :};
+
+arg_list ::=
+   arg_list:x0 COMMA expression:x1
+      {: RESULT = x0.append(x1); :}
+   | expression:x
+      {: RESULT = new ExpList(x); :};

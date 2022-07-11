@@ -1,0 +1,14 @@
+/* 
+    Checkpoint 3 Test 4
+    Description:    The number 9 printed 3 times
+    By:             Adrian Clinansmith
+    Date:           April 2022
+    Demonstrates:   Variable assignment, long math expression
+*/
+void main(void) {
+    int x; int y; int z;
+    z = y = x = 2+(7*8-14*3)/2;
+    output(x);
+    output(y);
+    output(z);
+}

@@ -1,0 +1,79 @@
+Checkpoint 3 lecture content
+==============================================
+----------------------------------------------
+Relevant lectures:
+----------------------------------------------
+
+RuntimeEnv begins - 09a 35:40
+IntermediateCodeGeneration begins - 10b 37:20
+TMSimulator begins - 10c
+
+
+----------------------------------------------
+Registers & Memory
+----------------------------------------------
+
+7. Program counter (pc): 	keeps track of the current instruction during execution.
+6. Global pointer (gp): 	points to the global data.
+5. Frame pointer (fp): 	points to the current activation record (frame).
+?. Stack pointer (sp): 	points to the top (lowest address) of the stack area.
+?. Argument pointer (ap): points to the argument area of an activation record.
+0. ac: 				used for general-purpose calculations / intermediate results.
+
+Note: all registers are initialized to 0.
+
+dMem: "data memory". This is where the results of calculations / execution are stored.
+iMem: "instruction memory". This is where the program is stored; hence it is what the 
+	 pc increments along.
+
+
+----------------------------------------------
+Assembly Syntax:
+----------------------------------------------
+
+- r1,r2,r3 refer to any three registers (not specifically registers 1, 2, and 3).
+- c refers to a constant value.
+- i refers to an ignored value.
+- In the actual assembly code, r1, r2, r3, c, and i are all integers.
+- mem(x) refers to memory (dMem) location x. Also note: mem(0) is initialized to dMem's
+  size - 1 (the last address), and all other dMem is initialized to 0. 
+- pc refers to the program counter; in this case, register 7.
+
+HALT i,i,i			halt the program
+IN r1,i,i			r1 := input
+OUT r1,i,i			output := r1
+ADD r1,r2,r3		r1 := r2 + r3 
+... SUB, MUL, DIV are similar to ADD
+
+LD r1,c(r2)		r1 := mem(c + r2)
+LDA r1,c(r2)		r1 := c + r2
+LDC r1,c(i)		r1 := c
+ST r1,c(r2)		mem(c + r2) := r1
+JLT r1,c(r2)		if r1 < 0 then pc := c + r2 
+... JLE, JGT, JGE, JEQ, JNE are similar to JLT 
+
+
+
+----------------------------------------------
+Lecture Info:
+----------------------------------------------
+
+The return address points to a place in the code space, whereas the control link points to a specific part of the caller's frame on the stack. - 09c 27:00
+
+Any element in a frame can be accessed via its offset from the frame pointer (fp), which gives the actual address in memory. - 09c 41:00
+
+When making a function call (new frame), the return address will be saved in a register. That address should be immediately saved by the callee in case the register is overwritten. - 10a 27:00
+
+Code will be compiled directly into assembly, not intermediate code, for simplicity and so that it can run directly on TM. - 10b 0:00
+
+Overview of incremental development plan - 10b 5:00
+
+TM Simulator architecture - 10b 06:30
+
+Register Memory instructions - 10b 18:00
+
+Sample assembly walkthrough - 10b 30:00
+
+Function "Calling Sequence" in assembly - 11b 13:30
+
+Emitting code (Java) - 11b 32:00

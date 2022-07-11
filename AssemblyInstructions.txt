@@ -1,0 +1,19 @@
+Calling Sequence (11-TMSimulator.pdf 12)
+-------------------------------------------------------
+
+* ofp points to the beginning of old frame pointer, which is where fp must return to when the frame is popped. 
+* OldFrameOffset is like a relative pointer to the stack pointer (sp), which points to the top of the stack.
+
+* ret is the return instruction address for pc. It is stored at fp - 1. 
+
+* initFO = -2 is the offset from fp to the start of the arguments list. 
+
+<code to compute first arg in ac>		...
+ST ac, frameOffset+initFO (fp)			mem(frameOffset + initFO + fp) := ac		* store first arg
+<code to compute second arg in ac>		...
+ST ac, frameOffset+initFO-1 (fp)		mem(frameOffset + initFO - 1 + fp) := ac	* store second arg
+ST fp, frameOffset+ofpFO (fp)			mem(frameOffset + ofpFO + fp) := fp		* store current fp
+LDA fp, frameOffset (fp)				fp := frameOffset + fp				* push new frame
+LDA ac, 1 (pc)					ac := pc + 1						* save ret in ac
+LDA pc, ... (pc)					pc := ... + pc					* relative jump to function entry
+LD fp, ofpFO (fp)					fp := mem(ofpFO + fp)				* pop current frame
